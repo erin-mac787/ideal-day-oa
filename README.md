@@ -38,10 +38,14 @@ runApp()
 ```
 
 
-
 ## Example screenshots
 
-... To be added shortly ...
+![Welcome screen/tab](screens/tab_01_welcome.png)
+
+![Ideal day tab](screens/tab_06_ideal.png)
+
+![Samll Steps tab](screens/tab_07_small_steps.png)
+
 
 
 
