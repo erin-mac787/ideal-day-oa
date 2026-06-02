@@ -818,14 +818,32 @@ server <- function(input, output, session) {
             z_wanted_std
           )
       )
-    
+    proj_vec <- 
+      if (abs(vlength_euclid(z_wanted_std)) < effective_zero) {
+        rep(0, 3)
+      } else {
+        scalar_proj_val_std * z_wanted_std / vlength_euclid(z_wanted_std)
+      }
+    ratio_of_wanted <- 
+      ifelse(
+        abs(vlength_euclid(z_wanted_std)) < effective_zero, 
+        0, 
+        scalar_proj_val_std / vlength_euclid(z_wanted_std)
+      )
     special_print_for_console(
-      "This is the scalar projected value of the sample covariance standardised [z_propos_std] onto [z_wanted_std]",
-      "This is a better measure of the relative length the vector [z_propos] sits ontop of [z_wanted] when",
-      "importantly considering the sample covariance to up-weight hard time-use changes or down-weight easier time-use changes",
-      "NB: currently this value needs to be greater than 0.05 or less than -0.05 to invoke a change from orange light to green or red, respectively."
+      "These are the c(scalar_proj_val_std, len(z_wanted_std), ratio, angle)-values of the sample",
+      "covariance standardised [z_propos_std] onto [z_wanted_std]. The relative length the standardised vector [z_propos]",
+      "sits ontop of the standardised [z_wanted] when importantly considering the sample covariance to up-weight",
+      "hard time-use changes or down-weight easier time-use changes.",
+      "The 'ratio' value represents the amount/proportion of the [z_wanted_std] vector covered by [z_propos_std] (and may be negative).",
+      "NB: currently the ratio needs to be greater than 0.05 or less than -0.05 to invoke a change from orange light to green or red, respectively."
     )
-   print(scalar_proj_val_std)
+    print(c(
+      "scalar_proj_val_std"= scalar_proj_val_std, 
+      "len(z_wanted_std)"= vlength_euclid(z_wanted_std), 
+      "ratio"= ratio_of_wanted, 
+      "angle" = get_theta_degrees(z_propos_std, z_wanted_std)
+    ))
     
    
    special_print_for_console(
@@ -833,32 +851,25 @@ server <- function(input, output, session) {
      "i.e., length(projection of [z_propos_std] ON [z_wanted_std]) / length([z_wanted_std]).",
      "This value represents the amount/proportion of the [z_wanted_std] vector covered by [z_propos_std]."
    )
-   proj_vec <- 
-     if (abs(vlength_euclid(z_wanted_std)) < effective_zero) {
-       rep(0, 3)
-     } else {
-       scalar_proj_val_std * z_wanted_std / vlength_euclid(z_wanted_std)
-     }
-   ratio_of_wanted <- 
-     ifelse(
-       abs(vlength_euclid(z_wanted_std)) < effective_zero, 
-       0, 
-       scalar_proj_val_std / vlength_euclid(z_wanted_std)
-     )
+
    ### redundant
+   cat("\n\n############### More detailed info for traceback if needed ######################\n\n")
    # print(paste("length(proj_[z_wanted_std]([z_propos_std])) =", vlength_euclid(scalar_proj_val_std * z_wanted_std / vlength_euclid(z_wanted_std))))
    cat(paste0("[z_wanted_std] = c(", paste(round(z_wanted_std, 4), collapse = ", "),")\n\n"))
    cat(paste0("proj_[z_wanted_std]([z_propos_std]) = c(", paste(round(proj_vec, 4), collapse = ", "),")\n\n"))
-   cat(paste("scalar projected value = length(proj_[z_wanted_std]([z_propos_std])) =", scalar_proj_val_std, "\n\n"))
-   cat(paste("length([z_wanted_std]) =", vlength_euclid(z_wanted_std), "\n\n"))
-   cat(paste("length(proj_[z_wanted_std]([z_propos_std])) / length([z_wanted_std]) =", ratio_of_wanted, "\n\n"))
-
+   cat(paste("len(z_propos_std) * cosangl(z_propos_std, z_wanted_std) =", scalar_proj_val_std, "\n\n"))
+   cat(paste("scalar_proj_val_std / length([z_wanted_std]) =", ratio_of_wanted, "\n\n"))
+   
+   
+   special_print_for_console("BEACON VALUES OF INTEREST")
+   cat(paste("theta_BEACON  =", sprintf("%3.2f", get_theta_degrees(z_propos_std, z_wanted_std)), "\n"))
+   cat(paste("p_BEACON  =", sprintf("%3.3f / %3.3f = %1.4f", scalar_proj_val_std, vlength_euclid(z_wanted_std), ratio_of_wanted), "\n\n"))
    
     ### intialise before if-else conditions
     # is_opt_largest <- (y_opt > y_cur)
     # is_good_delta <- is_opt_largest & check_good_delta(y_new, y_cur, y_opt)
     # is_bad_delta  <- is_opt_largest & check_bad_delta(y_new, y_cur, y_opt)
-    is_magnitude <- (abs(scalar_proj_val_std) > 0.05)
+    is_magnitude <- (abs(ratio_of_wanted) > 0.05)
     is_good_delta <- is_magnitude & (scalar_proj_val_std > 0)
     is_bad_delta  <- is_magnitude & (scalar_proj_val_std < 0)
     

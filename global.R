@@ -30,7 +30,11 @@ cosangl_euclid <- function(u, v) {
   dotprod_euclid(u, v) / (vlength_euclid(u) * vlength_euclid(v))
 }
 get_theta_degrees <- function(u, v) {
-  180 * acos(cosangl_euclid(u, v)) / pi
+  if (vlength_euclid(u) < 1e-12) {
+    return(0)
+  } else {
+    return(180 * acos(cosangl_euclid(u, v)) / pi)
+  }
 }
 
 # x1 <- c(1,0,0); x2 <- c(1,2,3); y1 <- c(3,4,5);
